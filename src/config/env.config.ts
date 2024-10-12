@@ -6,6 +6,8 @@ dotenv.config();
 const envSchema = z.object({
 	PORT: z.string().default("5000"),
 	JWT_SECRET: z.string().min(32).max(32),
+	APP_EMAIL: z.string().email({ message: "Email Address Required" }),
+	APP_PASSWORD: z.string({ message: "Password Required" }),
 });
 
 const env = envSchema.parse(process.env);
