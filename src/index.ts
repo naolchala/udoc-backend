@@ -1,5 +1,5 @@
 import env from "@/config/env.config";
-import app from "./app";
+import app from "@/config/express.config";
 
 app.listen(env.PORT, () => {
 	/* eslint-disable no-console */
