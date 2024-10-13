@@ -6,7 +6,20 @@ const LoginValidators = () => [
 		.withMessage("Please enter your email")
 		.isEmail()
 		.withMessage("Please Enter a valid email"),
+	body("password")
+		.notEmpty()
+		.withMessage("Please enter your password")
+		.isLength({
+			min: 6,
+			max: 20,
+		})
+		.withMessage("Password must be between 6 and 20 characters long"),
 ];
+
+export type LoginBody = {
+	email: string;
+	password: string;
+};
 
 const RegisterValidators = () => [
 	body("fullName")

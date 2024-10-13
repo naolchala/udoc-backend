@@ -7,6 +7,41 @@ import {
 } from "@/utils/email";
 import { encryptPassword } from "@/utils/hash";
 import httpStatus from "http-status";
+import bcrypt from "bcrypt";
+import { omit } from "lodash";
+
+interface LoginParams {
+	email: string;
+	password: string;
+}
+
+const login = async ({ email, password }: LoginParams) => {
+	const user = await prisma.user.findUnique({
+		where: {
+			email,
+		},
+	});
+
+	if (!user) {
+		throw new APIError({
+			message: "User with such email does not found",
+			field: "email",
+			status: httpStatus.NOT_FOUND,
+			isPublic: true,
+		});
+	}
+
+	if (!(await bcrypt.compare(password, user.password))) {
+		throw new APIError({
+			message: "Wrong password",
+			field: "password",
+			status: httpStatus.UNAUTHORIZED,
+			isPublic: true,
+		});
+	}
+
+	return omit(user, "password");
+};
 
 interface RegisterParams {
 	fullName: string;
@@ -66,7 +101,7 @@ const verifyEmail = async (userId: string, code: string) => {
 		});
 	}
 
-	const [updatedUser, _] = await prisma.$transaction([
+	const [, updatedUser] = await prisma.$transaction([
 		prisma.emailVerification.deleteMany({
 			where: {
 				userId,
@@ -133,7 +168,7 @@ const sendVerificationEmail = async (userId: string) => {
 };
 
 const findById = async (id: string) => {
-	return await prisma.user.findUnique({
+	return prisma.user.findUnique({
 		where: {
 			id,
 		},
@@ -142,6 +177,7 @@ const findById = async (id: string) => {
 
 export default {
 	findById,
+	login,
 	register,
 	verifyEmail,
 	sendVerificationEmail,

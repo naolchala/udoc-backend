@@ -3,9 +3,16 @@ import { authenticateRoute } from "@/middleware/auth.middleware";
 import { catchAsync } from "@/utils/catchAsync";
 import { parseValidationResult } from "@/utils/parseValidationResult";
 import authValidators from "@/validators/auth.validators";
-import { Request, Response, Router } from "express";
+import { Router } from "express";
 
 const AuthRouter = Router();
+
+AuthRouter.post(
+	"/login",
+	authValidators.LoginValidators(),
+	parseValidationResult,
+	catchAsync(AuthController.login)
+);
 
 AuthRouter.post(
 	"/register",
