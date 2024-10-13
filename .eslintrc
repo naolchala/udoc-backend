@@ -1,6 +1,6 @@
 {
   "extends": [
-    "custom/react-internal",
+    // "custom/react-internal",
     "airbnb",
     "prettier"
   ],

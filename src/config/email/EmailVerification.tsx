@@ -12,57 +12,45 @@ import {
 	Button,
 	render,
 } from "@react-email/components";
+import env from "@/config/env.config";
 
-const MagicCodeEmail = () => {
+const MagicCodeEmail = ({ code }: { code: string }) => {
 	return (
 		<Html>
 			<Head />
-			<Preview>Sign in to jobaccepted.com</Preview>
+			<Preview>Verify your email for UDoc</Preview>
 			<Body style={main}>
 				<Container style={container}>
-					<Text style={company}>Job Accepted</Text>
-					<Heading style={codeTitle}>
-						Your authentication code
-					</Heading>
+					<Text style={company}>UDoc</Text>
+					<Heading style={codeTitle}>Verify your email</Heading>
 					<Text style={codeDescription}>
-						Enter it in your open browser window or press the sign
-						in button. This code will expire in 15 minutes.
+						Enter it in your open browser window. This code will
+						expire in 15 minutes.
 					</Text>
 					<Section style={codeContainer}>
-						<Heading style={codeStyle}>564873</Heading>
+						<Heading style={codeStyle}>{code}</Heading>
 					</Section>
-					<Section style={buttonContainer}>
-						<Button
-							href="https://www.jobaccepted.com/"
-							style={button}
-						>
-							Sign in
-						</Button>
+					<Section style={footer}>
+						<Text style={paragraph}>Not expecting this email?</Text>
+						<Text style={paragraph}>
+							Contact{" "}
+							<Link href={"mailto:" + env.APP_EMAIL} style={link}>
+								{env.APP_EMAIL}
+							</Link>{" "}
+							if you did not request this code.
+						</Text>
 					</Section>
-					<Text style={paragraph}>Not expecting this email?</Text>
-					<Text style={paragraph}>
-						Contact{" "}
-						<Link
-							href="mailto:support@jobaccepted.com"
-							style={link}
-						>
-							support@jobaccepted.com
-						</Link>{" "}
-						if you did not request this code.
-					</Text>
 				</Container>
 			</Body>
 		</Html>
 	);
 };
 
-export const getMagicCodeEmail = async () => {
-	return await render(<MagicCodeEmail />);
-};
+export default MagicCodeEmail;
 
 const main = {
 	backgroundColor: "#ffffff",
-	fontFamily: "HelveticaNeue,Helvetica,Arial,sans-serif",
+	fontFamily: "Inter,HelveticaNeue,Helvetica,Arial,sans-serif",
 	textAlign: "center" as const,
 };
 
@@ -92,7 +80,7 @@ const codeDescription = {
 };
 
 const codeContainer = {
-	background: "rgba(0,0,0,.05)",
+	background: "#006fee",
 	borderRadius: "4px",
 	margin: "16px auto 14px",
 	verticalAlign: "middle",
@@ -101,7 +89,7 @@ const codeContainer = {
 };
 
 const codeStyle = {
-	color: "#000",
+	color: "#fff",
 	display: "inline-block",
 	paddingBottom: "8px",
 	paddingTop: "8px",
@@ -109,21 +97,6 @@ const codeStyle = {
 	width: "100%",
 	textAlign: "center" as const,
 	letterSpacing: "8px",
-};
-
-const buttonContainer = {
-	margin: "27px auto",
-	width: "auto",
-};
-
-const button = {
-	backgroundColor: "#5e6ad2",
-	borderRadius: "3px",
-	fontWeight: "600",
-	color: "#fff",
-	textAlign: "center" as const,
-	padding: "12px 24px",
-	margin: "0 auto",
 };
 
 const paragraph = {
@@ -137,4 +110,12 @@ const paragraph = {
 const link = {
 	color: "#444",
 	textDecoration: "underline",
+};
+
+const footer = {
+	marginTop: "40px",
+};
+
+export const getMagicCodeEmail = async ({ code }: { code: string }) => {
+	return await render(<MagicCodeEmail code={code} />);
 };
