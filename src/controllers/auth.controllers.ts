@@ -1,7 +1,11 @@
 import { RequestWithUser } from "@/interfaces/Request";
 import UserModel from "@/models/user";
 import { encryptJWT } from "@/utils/hash";
-import { LoginBody, RegistrationBody } from "@/validators/auth.validators";
+import {
+	LoginBody,
+	RegistrationBody,
+	ResetPasswordBody,
+} from "@/validators/auth.validators";
 import { Request, Response } from "express";
 import { matchedData } from "express-validator";
 
@@ -31,6 +35,26 @@ const verifyEmail = async (req: Request, res: Response) => {
 	return res.json({ message: "Email verified" });
 };
 
-const AuthController = { register, sendVerificationEmail, verifyEmail, login };
+const forgotPassword = async (req: Request, res: Response) => {
+	const { email } = matchedData(req);
+	await UserModel.forgotPassword(email);
+	return res.json({ message: "Password reset code sent via email" });
+};
+
+const resetPassword = async (req: Request, res: Response) => {
+	const { code, password } = req.body as ResetPasswordBody;
+	const user = await UserModel.resetPasswordByCode(code, password);
+	const token = await encryptJWT(user.id);
+	return res.json({ ...user, token });
+};
+
+const AuthController = {
+	register,
+	sendVerificationEmail,
+	verifyEmail,
+	login,
+	forgotPassword,
+	resetPassword,
+};
 
 export default AuthController;

@@ -30,7 +30,23 @@ AuthRouter.post(
 AuthRouter.post(
 	"/verify-email",
 	authenticateRoute,
+	authValidators.VerifyEmailValidator(),
+	parseValidationResult,
 	catchAsync(AuthController.verifyEmail)
+);
+
+AuthRouter.post(
+	"/forgot-password",
+	authValidators.ForgotPasswordValidator(),
+	parseValidationResult,
+	catchAsync(AuthController.forgotPassword)
+);
+
+AuthRouter.post(
+	"/reset-password",
+	authValidators.ResetPasswordValidation(),
+	parseValidationResult,
+	catchAsync(AuthController.resetPassword)
 );
 
 export default AuthRouter;

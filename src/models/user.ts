@@ -3,6 +3,7 @@ import { defaultProfilePictureUrl } from "@/constants/urls";
 import APIError from "@/interfaces/APIError";
 import {
 	generateVerificationCode,
+	sendForgotPasswordEmail,
 	sendVerificationCodeEmail,
 } from "@/utils/email";
 import { encryptPassword } from "@/utils/hash";
@@ -175,10 +176,84 @@ const findById = async (id: string) => {
 	});
 };
 
+const forgotPassword = async (email: string) => {
+	const user = await prisma.user.findUnique({
+		where: {
+			email,
+		},
+	});
+
+	if (!user) {
+		throw new APIError({
+			message: "User with such email doesn't not found",
+			field: "email",
+			status: httpStatus.NOT_FOUND,
+			isPublic: true,
+		});
+	}
+
+	const code = generateVerificationCode().toString();
+	await prisma.emailVerification.create({
+		data: {
+			code,
+			userId: user.id,
+		},
+	});
+
+	await sendForgotPasswordEmail({
+		email,
+		code,
+	});
+};
+
+const resetPasswordByCode = async (code: string, password: string) => {
+	const verification = await prisma.emailVerification.findFirst({
+		where: {
+			code,
+			createdAt: {
+				gt: new Date(Date.now() - 15 * 60 * 1000),
+			},
+		},
+	});
+
+	if (!verification) {
+		throw new APIError({
+			message: "Invalid verification code",
+			field: "code",
+			status: httpStatus.BAD_REQUEST,
+			isPublic: true,
+		});
+	}
+
+	const hashedPassword = await encryptPassword(password);
+	const [, updatedUser] = await prisma.$transaction([
+		prisma.emailVerification.deleteMany({
+			where: {
+				userId: verification.userId,
+			},
+		}),
+		prisma.user.update({
+			where: {
+				id: verification.userId,
+			},
+			data: {
+				password: hashedPassword,
+			},
+			omit: {
+				password: true,
+			},
+		}),
+	]);
+
+	return updatedUser;
+};
+
 export default {
 	findById,
+	forgotPassword,
 	login,
 	register,
-	verifyEmail,
+	resetPasswordByCode,
 	sendVerificationEmail,
+	verifyEmail,
 };

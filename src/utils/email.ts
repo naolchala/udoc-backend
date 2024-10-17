@@ -1,4 +1,5 @@
 import { getMagicCodeEmail } from "@/config/email/EmailVerification";
+import { getForgotPasswordCodeEmail } from "@/config/email/ForgotPassword";
 import mailer from "@/config/nodemailer.config";
 
 interface EmailOptions {
@@ -14,6 +15,20 @@ export const sendVerificationCodeEmail = async ({
 		to: email,
 		subject: "Verify your email for UDoc",
 		html: await getMagicCodeEmail({ code }),
+	});
+
+	return result;
+};
+
+export const sendForgotPasswordEmail = async ({
+	email,
+	code,
+}: EmailOptions) => {
+	const result = await mailer.sendMail({
+		from: process.env.APP_EMAIL,
+		to: email,
+		subject: "Reset Password code requested for UDoc",
+		html: await getForgotPasswordCodeEmail({ code }),
 	});
 
 	return result;
