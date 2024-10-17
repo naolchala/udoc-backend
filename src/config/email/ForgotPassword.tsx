@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 import React from "react";
 import {
 	Body,
@@ -9,20 +10,19 @@ import {
 	Preview,
 	Section,
 	Text,
-	Button,
 	render,
 } from "@react-email/components";
 import env from "@/config/env.config";
 
-const MagicCodeEmail = ({ code }: { code: string }) => {
+function ForgotPasswordCodeEmail({ code }: { code: string }) {
 	return (
 		<Html>
 			<Head />
-			<Preview>Verify your email for UDoc</Preview>
+			<Preview>Reset Your Password</Preview>
 			<Body style={main}>
 				<Container style={container}>
 					<Text style={company}>UDoc</Text>
-					<Heading style={codeTitle}>Verify your email</Heading>
+					<Heading style={codeTitle}>Reset Your Password</Heading>
 					<Text style={codeDescription}>
 						Enter it in your open browser window. This code will
 						expire in 15 minutes.
@@ -34,7 +34,7 @@ const MagicCodeEmail = ({ code }: { code: string }) => {
 						<Text style={paragraph}>Not expecting this email?</Text>
 						<Text style={paragraph}>
 							Contact{" "}
-							<Link href={"mailto:" + env.APP_EMAIL} style={link}>
+							<Link href={`mailto:${env.APP_EMAIL}`} style={link}>
 								{env.APP_EMAIL}
 							</Link>{" "}
 							if you did not request this code.
@@ -44,9 +44,9 @@ const MagicCodeEmail = ({ code }: { code: string }) => {
 			</Body>
 		</Html>
 	);
-};
+}
 
-export default MagicCodeEmail;
+export default ForgotPasswordCodeEmail;
 
 const main = {
 	backgroundColor: "#ffffff",
@@ -116,6 +116,10 @@ const footer = {
 	marginTop: "40px",
 };
 
-export const getMagicCodeEmail = async ({ code }: { code: string }) => {
-	return await render(<MagicCodeEmail code={code} />);
+export const getForgotPasswordCodeEmail = async ({
+	code,
+}: {
+	code: string;
+}) => {
+	return render(<ForgotPasswordCodeEmail code={code} />);
 };

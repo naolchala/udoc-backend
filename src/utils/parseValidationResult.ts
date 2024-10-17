@@ -11,9 +11,15 @@ export const parseValidationResult = (
 	const result = validationResult(req);
 
 	if (!result.isEmpty()) {
-		return res
-			.status(httpStatus.BAD_REQUEST)
-			.json(result.array({ onlyFirstError: true }));
+		const err = result.array()[0] as any;
+		next(
+			new APIError({
+				message: err.msg,
+				field: err.path,
+				status: httpStatus.BAD_REQUEST,
+				isPublic: true,
+			})
+		);
 	}
 
 	next();
