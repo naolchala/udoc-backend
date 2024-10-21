@@ -1,9 +1,10 @@
 import env from "@/config/env.config";
 import bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
+
 export const encryptPassword = async (password: string) => {
 	const salt = bcrypt.genSaltSync(12);
-	return await bcrypt.hash(password, salt);
+	return bcrypt.hash(password, salt);
 };
 
 export const encryptJWT = async (id: string) => {

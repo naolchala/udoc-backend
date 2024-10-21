@@ -1,8 +1,9 @@
 import APIError from "@/interfaces/APIError";
 import { NextFunction, Request, Response } from "express";
-import { body, ValidationChain, validationResult } from "express-validator";
+import { validationResult } from "express-validator";
 import httpStatus from "http-status";
 
+// eslint-disable-next-line import/prefer-default-export
 export const parseValidationResult = (
 	req: Request,
 	res: Response,
