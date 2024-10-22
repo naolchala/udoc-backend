@@ -17,6 +17,23 @@ DocsRouter.post(
 );
 
 DocsRouter.get("/", authenticateRoute, catchAsync(DocsController.getUserDocs));
+
+DocsRouter.delete(
+	"/:id",
+	authenticateRoute,
+	DocsValidators.deleteDocValidator,
+	parseValidationResult,
+	catchAsync(DocsController.deleteDoc)
+);
+
+DocsRouter.put(
+	"/:id",
+	authenticateRoute,
+	DocsValidators.updateDocValidator,
+	parseValidationResult,
+	catchAsync(DocsController.updateDoc)
+);
+
 DocsRouter.get(
 	"/:slug",
 	authenticateRoute,

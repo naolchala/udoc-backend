@@ -1,5 +1,9 @@
 import { RequestWithUser } from "@/interfaces/Request";
-import { CreateDocBody } from "@/validators/docs.validators";
+import {
+	CreateDocBody,
+	DeleteDocParam,
+	UpdateDocBody,
+} from "@/validators/docs.validators";
 import { Request, Response } from "express";
 
 import DocsModel from "@/models/documentation";
@@ -27,10 +31,37 @@ const getUserDocsBySlug = async (req: Request, res: Response) => {
 	return res.json(doc);
 };
 
+const deleteDoc = async (req: Request, res: Response) => {
+	const { user } = req as RequestWithUser;
+	const { id } = req.params as DeleteDocParam;
+	const doc = await DocsModel.deleteDocumentation({
+		docId: id,
+		userId: user.id,
+	});
+
+	return res.json(doc);
+};
+
+const updateDoc = async (req: Request, res: Response) => {
+	const { user } = req as RequestWithUser;
+	const { id } = req.params as { id: string };
+	const { title, description } = req.body as UpdateDocBody;
+	const updatedDoc = await DocsModel.updateDocumentation({
+		docId: id,
+		title,
+		description,
+		userId: user.id,
+	});
+
+	return res.json(updatedDoc);
+};
+
 const DocsController = {
 	createDoc,
 	getUserDocs,
 	getUserDocsBySlug,
+	deleteDoc,
+	updateDoc,
 };
 
 export default DocsController;

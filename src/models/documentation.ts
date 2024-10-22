@@ -1,7 +1,8 @@
 import prisma from "@/config/prisma.config";
 import APIError from "@/interfaces/APIError";
-import { slugify } from "@/utils";
 import httpStatus from "http-status";
+
+import { slugify } from "@/utils";
 
 interface CreateDocumentationProps {
 	creatorId: string;
@@ -84,8 +85,103 @@ const getUserDocsBySlug = async ({ slug, userId }: GetDocBySlugProps) => {
 	return doc;
 };
 
+interface DeleteDocProps {
+	docId: string;
+	userId: string;
+}
+
+const deleteDocumentation = async ({ docId, userId }: DeleteDocProps) => {
+	const doc = await prisma.documentation.findUnique({
+		where: {
+			id: docId,
+		},
+	});
+
+	if (!doc) {
+		throw new APIError({
+			message: "Documentation not found",
+			status: httpStatus.NOT_FOUND,
+			isPublic: true,
+		});
+	}
+
+	if (userId !== doc.ownerId) {
+		throw new APIError({
+			message: "You don't have permission to delete this documentation",
+			status: httpStatus.UNAUTHORIZED,
+			isPublic: true,
+		});
+	}
+
+	const deletedDoc = await prisma.documentation.delete({
+		where: { id: doc.id },
+	});
+
+	return deletedDoc;
+};
+
+interface UpdateDocBody {
+	userId: string;
+	docId: string;
+	title: string;
+	description?: string;
+}
+
+const updateDocumentation = async ({
+	userId,
+	docId,
+	title,
+	description,
+}: UpdateDocBody) => {
+	const doc = await prisma.documentation.findUnique({ where: { id: docId } });
+	if (!doc) {
+		throw new APIError({
+			message: "Documentation not found",
+			status: httpStatus.NOT_FOUND,
+			isPublic: true,
+		});
+	}
+
+	if (userId !== doc.ownerId) {
+		throw new APIError({
+			message: "You don't have permission to update this documentation",
+			status: httpStatus.UNAUTHORIZED,
+			isPublic: true,
+		});
+	}
+
+	let slug = slugify(title);
+
+	if (slug !== doc.slug) {
+		const count = await prisma.documentation.count({
+			where: {
+				slug: {
+					startsWith: slug,
+				},
+			},
+		});
+
+		if (count > 0) {
+			slug += `-${count + 1}`;
+		}
+	}
+
+	const updatedDoc = await prisma.documentation.update({
+		where: { id: docId },
+		data: {
+			title,
+			description,
+			slug,
+		},
+	});
+
+	return updatedDoc;
+};
+
 export default {
 	createDocumentation,
 	getUserDocs,
 	getUserDocsBySlug,
+	deleteDocumentation,
+	updateDocumentation,
 };
