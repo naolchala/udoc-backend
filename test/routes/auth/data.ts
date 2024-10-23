@@ -1,3 +1,5 @@
+import { generateVerificationCode } from "@/utils/email";
+
 const validUser = {
 	fullName: "Naol Chala",
 	email: "naolchala@gmail.com",
@@ -34,6 +36,8 @@ const emptyPasswordCredential = {
 	password: "",
 };
 
+const emailVerificationCode = generateVerificationCode().toString();
+
 const authData = {
 	validUser,
 	validUserCredentials,
@@ -42,5 +46,6 @@ const authData = {
 	emptyEmailCredential,
 	invalidEmailFormatCredential,
 	emptyPasswordCredential,
+	emailVerificationCode,
 };
 export default authData;

@@ -2,6 +2,8 @@ import request from "supertest";
 import app from "@/config/express.config";
 import httpStatus from "http-status";
 import prisma from "@/config/prisma.config";
+import { User } from "@prisma/client";
+import { generateVerificationCode } from "@/utils/email";
 import authSeeders from "./seeders";
 import authData from "./data";
 
@@ -111,6 +113,62 @@ describe("Auth - User Registration Test", () => {
 
 		expect(response.status).toBe(httpStatus.BAD_REQUEST);
 		expect(response.body.message).toBeDefined();
+	});
+
+	afterAll(async () => {
+		await prisma.user.deleteMany();
+	});
+});
+
+describe("Auth - User Send Email Verification", () => {});
+
+describe("Auth - User Verify Email", () => {
+	let user: User & { token: string };
+
+	beforeAll(async () => {
+		user = await authSeeders.userSeeder();
+	});
+
+	beforeEach(async () => {
+		await authSeeders.verificationCodeSeeder(user.id);
+	});
+
+	it("should verify email with valid code", async () => {
+		const response = await request(app)
+			.post("/api/auth/verify-email")
+			.set("Authorization", `Bearer ${user.token}`)
+			.send({
+				code: authData.emailVerificationCode,
+			});
+
+		expect(response.status).toBe(httpStatus.OK);
+		expect(response.body.message).toBeDefined();
+	});
+
+	it("should return an error when wrong code is sent", async () => {
+		const response = await request(app)
+			.post("/api/auth/verify-email")
+			.set("Authorization", `Bearer ${user.token}`)
+			.send({
+				code: generateVerificationCode().toString(),
+			});
+
+		expect(response.status).toBe(httpStatus.BAD_REQUEST);
+		expect(response.body.message).toBeDefined();
+	});
+
+	it("should return an error when empty code is sent", async () => {
+		const response = await request(app)
+			.post("/api/auth/verify-email")
+			.set("Authorization", `Bearer ${user.token}`)
+			.send({});
+
+		expect(response.status).toBe(httpStatus.BAD_REQUEST);
+		expect(response.body.message).toBeDefined();
+	});
+
+	afterEach(async () => {
+		await prisma.emailVerification.deleteMany();
 	});
 
 	afterAll(async () => {
