@@ -3,11 +3,12 @@ import prisma from "@/config/prisma.config";
 import request from "supertest";
 import httpStatus from "http-status";
 
-import { User } from "@prisma/client";
+import { Documentation, User } from "@prisma/client";
 
 import _ from "lodash";
 import docsData from "./data";
 import authSeeders from "../auth/seeders";
+import docsSeeder from "./seeder";
 
 describe("Docs - Creates Documentation", () => {
 	let user: User & { token: string };
@@ -57,5 +58,51 @@ describe("Docs - Creates Documentation", () => {
 
 	afterAll(async () => {
 		await prisma.documentation.deleteMany();
+	});
+});
+
+describe("Docs - Delete Documentation", () => {
+	let user: User & { token: string };
+	let doc: Documentation;
+
+	beforeAll(async () => {
+		await prisma.documentation.deleteMany();
+		user = await authSeeders.userSeeder();
+	});
+
+	beforeEach(async () => {
+		doc = await docsSeeder.createDoc(user.id);
+	});
+
+	it("should delete documentation", async () => {
+		const response = await request(app)
+			.delete(`/api/docs/${doc.id}`)
+			.set("Authorization", `Bearer ${user.token}`)
+			.send();
+
+		expect(response.status).toBe(httpStatus.OK);
+		const deletedDoc = await prisma.documentation.findUnique({
+			where: { id: doc.id },
+		});
+
+		expect(deletedDoc).toBeNull();
+	});
+
+	it("should block unauthorized users to delete documentation", async () => {
+		const response = await request(app)
+			.delete(`/api/docs/${doc.id}`)
+			.send();
+
+		expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+	});
+
+	it("should block other users from deleting others documentation", async () => {
+		const anotherUser = await authSeeders.anotherUserSeeder();
+		const response = await request(app)
+			.delete(`/api/docs/${doc.id}`)
+			.set("Authorization", `Bearer ${anotherUser.token}`)
+			.send();
+
+		expect(response.status).toBe(httpStatus.UNAUTHORIZED);
 	});
 });

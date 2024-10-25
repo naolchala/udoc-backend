@@ -120,8 +120,6 @@ describe("Auth - User Registration Test", () => {
 	});
 });
 
-describe("Auth - User Send Email Verification", () => {});
-
 describe("Auth - User Verify Email", () => {
 	let user: User & { token: string };
 

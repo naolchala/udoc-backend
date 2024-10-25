@@ -16,6 +16,21 @@ const userSeeder = async () => {
 	return { ...user, token };
 };
 
+const anotherUserSeeder = async () => {
+	const hashedPassword = await encryptPassword(authData.validUser.password);
+	const user = await prisma.user.create({
+		data: {
+			...authData.validUser,
+			email: "anotherUser@mail.com",
+			password: hashedPassword,
+		},
+	});
+
+	const token = await encryptJWT(user.id);
+
+	return { ...user, token };
+};
+
 const verificationCodeSeeder = async (userId: string) => {
 	const verification = await prisma.emailVerification.create({
 		data: {
@@ -27,5 +42,5 @@ const verificationCodeSeeder = async (userId: string) => {
 	return verification;
 };
 
-const authSeeders = { userSeeder, verificationCodeSeeder };
+const authSeeders = { userSeeder, anotherUserSeeder, verificationCodeSeeder };
 export default authSeeders;

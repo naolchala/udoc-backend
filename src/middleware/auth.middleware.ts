@@ -6,6 +6,7 @@ import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 import { logger } from "@/config/logger.config";
 
+// eslint-disable-next-line import/prefer-default-export
 export const authenticateRoute = async (
 	req: Request | RequestWithUser,
 	res: Response,
