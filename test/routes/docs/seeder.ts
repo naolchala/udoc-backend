@@ -16,8 +16,23 @@ const createDoc = async (userId: string) => {
 	return doc;
 };
 
+const createMultipleDocs = async (userId: string) => {
+	const docInputs = docsData.multipleValidDocumentations.map((doc) => ({
+		...doc,
+		slug: slugify(doc.title),
+		ownerId: userId,
+	}));
+
+	const docs = await prisma.documentation.createMany({
+		data: docInputs,
+	});
+
+	return docs;
+};
+
 const docsSeeder = {
 	createDoc,
+	createMultipleDocs,
 };
 
 export default docsSeeder;

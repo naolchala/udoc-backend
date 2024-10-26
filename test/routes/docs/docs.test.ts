@@ -165,3 +165,43 @@ describe("Docs - Updates Documentation", () => {
 		await prisma.user.deleteMany();
 	});
 });
+
+describe("Docs - Get Lists of Documentations", () => {
+	let user: User & { token: string };
+	beforeAll(async () => {
+		user = await authSeeders.userSeeder();
+		await docsSeeder.createMultipleDocs(user.id);
+	});
+
+	it("should get list of users  documentations", async () => {
+		const response = await request(app)
+			.get("/api/docs")
+			.set("Authorization", `Bearer ${user.token}`)
+			.send();
+
+		expect(response.status).toBe(httpStatus.OK);
+		expect(response.body.length).toBe(
+			docsData.multipleValidDocumentations.length
+		);
+
+		const titles = response.body.map((d: { title: string }) => d.title);
+
+		docsData.multipleValidDocumentations.forEach((doc) => {
+			expect(titles).toContain(doc.title);
+		});
+	});
+
+	it("should not provides documentations of other users", async () => {
+		const anotherUser = await authSeeders.anotherUserSeeder();
+		const anotherUserDoc = await docsSeeder.createDoc(anotherUser.id);
+
+		const response = await request(app)
+			.get("/api/docs")
+			.set("Authorization", `Bearer ${user.token}`)
+			.send();
+
+		expect(response.status).toBe(httpStatus.OK);
+		const ids = response.body.map((d: { id: string }) => d.id);
+		expect(ids).not.toContain(anotherUserDoc.id);
+	});
+});
