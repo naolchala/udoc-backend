@@ -173,3 +173,38 @@ describe("Auth - User Verify Email", () => {
 		await prisma.user.deleteMany();
 	});
 });
+
+describe("Auth - User Route Test", () => {
+	let user: User & { token: string };
+
+	beforeAll(async () => {
+		user = await authSeeders.userSeeder();
+	});
+
+	it("should return user data with valid token", async () => {
+		const response = await request(app)
+			.get("/api/auth/user")
+			.set("Authorization", `Bearer ${user.token}`);
+
+		expect(response.status).toBe(httpStatus.OK);
+		expect(response.body.email).toBe(user.email);
+		expect(response.body.fullName).toBe(user.fullName);
+		expect(response.body.id).toBeDefined();
+	});
+
+	it("should return an error with invalid token", async () => {
+		const response = await request(app)
+			.get("/api/auth/user")
+			.set("Authorization", `Bearer invalid-token`);
+
+		expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+		expect(response.body.message).toBeDefined();
+	});
+
+	it("should return an error without token", async () => {
+		const response = await request(app).get("/api/auth/user");
+
+		expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+		expect(response.body.message).toBeDefined();
+	});
+});
