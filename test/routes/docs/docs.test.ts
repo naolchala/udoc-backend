@@ -211,6 +211,7 @@ describe("Docs - Get Documentation by Slug", () => {
 	let doc: Documentation;
 
 	beforeAll(async () => {
+		await prisma.documentation.deleteMany({});
 		user = await authSeeders.userSeeder();
 		doc = await docsSeeder.createDoc(user.id);
 	});

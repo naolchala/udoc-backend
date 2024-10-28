@@ -9,8 +9,8 @@
     "build": "tsc",
     "start:dist": "node dist/src/index.js",
     "lint": "eslint src/*.ts test/*.ts",
-    "test": "dotenv -e .env.test -- jest -i --verbose",
-    "coverage": "dotenv -e .env.test -- jest --collectCoverage",
+    "test": "dotenv -e .env.test -- jest -i --verbose --runInBand",
+    "coverage": "dotenv -e .env.test -- jest --collectCoverage --runInBand",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],
