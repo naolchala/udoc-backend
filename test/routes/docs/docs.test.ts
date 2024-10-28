@@ -205,3 +205,54 @@ describe("Docs - Get Lists of Documentations", () => {
 		expect(ids).not.toContain(anotherUserDoc.id);
 	});
 });
+
+describe("Docs - Get Documentation by Slug", () => {
+	let user: User & { token: string };
+	let doc: Documentation;
+
+	beforeAll(async () => {
+		user = await authSeeders.userSeeder();
+		doc = await docsSeeder.createDoc(user.id);
+	});
+
+	it("should get documentation by slug", async () => {
+		const response = await request(app)
+			.get(`/api/docs/${doc.slug}`)
+			.set("Authorization", `Bearer ${user.token}`)
+			.send();
+
+		expect(response.status).toBe(httpStatus.OK);
+		expect(response.body.title).toBe(doc.title);
+		expect(response.body.description).toBe(doc.description);
+	});
+
+	it("should return 404 if documentation not found", async () => {
+		const response = await request(app)
+			.get("/api/docs/non-existent-slug")
+			.set("Authorization", `Bearer ${user.token}`)
+			.send();
+
+		expect(response.status).toBe(httpStatus.NOT_FOUND);
+	});
+
+	it("should return 401 if unauthorized user tries to access documentation", async () => {
+		const response = await request(app).get(`/api/docs/${doc.slug}`).send();
+
+		expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+	});
+
+	it("should return 403 if user tries to access documentation they do not own", async () => {
+		const anotherUser = await authSeeders.anotherUserSeeder();
+		const response = await request(app)
+			.get(`/api/docs/${doc.slug}`)
+			.set("Authorization", `Bearer ${anotherUser.token}`)
+			.send();
+
+		expect(response.status).toBe(httpStatus.UNAUTHORIZED);
+	});
+
+	afterAll(async () => {
+		await prisma.documentation.deleteMany();
+		await prisma.user.deleteMany();
+	});
+});
