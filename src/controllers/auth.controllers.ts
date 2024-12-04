@@ -8,6 +8,7 @@ import {
 } from "@/validators/auth.validators";
 import { Request, Response } from "express";
 import { matchedData } from "express-validator";
+import _ from "lodash";
 
 const login = async (req: Request, res: Response) => {
 	const { email, password } = req.body as LoginBody;
@@ -48,6 +49,12 @@ const resetPassword = async (req: Request, res: Response) => {
 	return res.json({ ...user, token });
 };
 
+const getUser = async (req: Request, res: Response) => {
+	const { user } = req as RequestWithUser;
+	const token = await encryptJWT(user.id);
+	return res.json({ ..._.omit(user, "password"), token });
+};
+
 const AuthController = {
 	register,
 	sendVerificationEmail,
@@ -55,6 +62,7 @@ const AuthController = {
 	login,
 	forgotPassword,
 	resetPassword,
+	getUser,
 };
 
 export default AuthController;

@@ -46,4 +46,18 @@ model Documentation {
   owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
+  topics      Topic[]
+}
+
+model Topic {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  slug      String        @unique
+  docId     String        @db.ObjectId
+  doc       Documentation @relation(fields: [docId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  parentId  String?       @db.ObjectId
+  parent    Topic?        @relation(name: "subTopic", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subTopics Topic[]       @relation(name: "subTopic")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }

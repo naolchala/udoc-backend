@@ -7,6 +7,8 @@ import { Router } from "express";
 
 const AuthRouter = Router();
 
+AuthRouter.get("/user", authenticateRoute, catchAsync(AuthController.getUser));
+
 AuthRouter.post(
 	"/login",
 	authValidators.LoginValidators(),
