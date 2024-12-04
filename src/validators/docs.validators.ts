@@ -5,7 +5,7 @@ const createDocValidator = [
 		.notEmpty({ ignore_whitespace: true })
 		.withMessage("Please enter title of the documentation")
 		.isLength({ max: 100, min: 3 })
-		.withMessage("Title cannot be more than 50 characters long"),
+		.withMessage("Title cannot be more than 100 characters long"),
 ];
 
 export type CreateDocBody = {
